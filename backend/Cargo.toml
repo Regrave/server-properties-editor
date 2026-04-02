@@ -1,0 +1,12 @@
+[package]
+name = "gg_ir77_serverproperties"
+description = "Minecraft server.properties Editor Extension"
+authors = []
+version = "1.0.0"
+edition = { workspace = true }
+
+[dependencies]
+shared = { workspace = true }
+async-trait = { workspace = true }
+tracing = { workspace = true }
+axum = { workspace = true }
