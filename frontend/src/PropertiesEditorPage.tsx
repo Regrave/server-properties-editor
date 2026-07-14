@@ -38,7 +38,7 @@ type CategoryFilter = 'all' | PropCategory;
 
 export default function PropertiesEditorPage() {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const { server, state } = useServerStore();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -192,7 +192,7 @@ export default function PropertiesEditorPage() {
       setParsedLines(parseServerProperties(content));
 
       addToast(
-        server.status === 'running' || server.status === 'starting'
+        state === 'running' || state === 'starting'
           ? 'Properties saved! Restart your server to apply changes.'
           : 'Properties saved successfully!',
         'success',
@@ -202,7 +202,7 @@ export default function PropertiesEditorPage() {
     } finally {
       setSaving(false);
     }
-  }, [changedKeys, values, parsedLines, server.uuid, server.status]);
+  }, [changedKeys, values, parsedLines, server.uuid, state]);
 
   // Category filter options
   const categoryOptions = useMemo(() => {
@@ -219,7 +219,7 @@ export default function PropertiesEditorPage() {
     return opts;
   }, [categorizedProperties]);
 
-  const isRunning = server.status === 'running' || server.status === 'starting';
+  const isRunning = state === 'running' || state === 'starting';
 
   return (
     <ServerContentContainer title='Server Properties'>

@@ -2,7 +2,7 @@
 name = "gg_ir77_serverproperties"
 description = "Minecraft server.properties Editor Extension"
 authors = ["Regrave"]
-version = "1.0.0"
+version = "1.0.1"
 edition = { workspace = true }
 
 [dependencies]
