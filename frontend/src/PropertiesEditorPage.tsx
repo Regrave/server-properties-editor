@@ -11,6 +11,7 @@ import {
   Textarea,
   Tooltip,
 } from '@mantine/core';
+import SegmentedControl from '@/elements/SegmentedControl.tsx';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { axiosInstance } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
