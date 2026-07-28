@@ -69,7 +69,7 @@ export const PROPERTIES: PropMeta[] = [
     key: 'motd',
     type: 'string',
     default: 'A Minecraft Server',
-    description: 'Message displayed in the server list below the server name. Supports color codes with the section sign.',
+    description: 'Message displayed in the server list below the server name. Supports color codes — use the editor to write them with & signs.',
     category: 'general',
   },
   {
@@ -706,6 +706,128 @@ export const PROPERTIES: PropMeta[] = [
     replacedBy: 'resource-pack',
   },
 ];
+
+// ─── MOTD color code support ─────────────────────────────────
+// server.properties is a Java .properties file: the section sign must be
+// written as the § escape (a raw § byte gets mangled to Â§ by the
+// vanilla server). The editor lets users type Bukkit-style & codes and
+// converts them to § escapes on save.
+
+/** Legacy Minecraft color codes → hex colors */
+export const MC_COLORS: Record<string, string> = {
+  '0': '#000000',
+  '1': '#0000AA',
+  '2': '#00AA00',
+  '3': '#00AAAA',
+  '4': '#AA0000',
+  '5': '#AA00AA',
+  '6': '#FFAA00',
+  '7': '#AAAAAA',
+  '8': '#555555',
+  '9': '#5555FF',
+  a: '#55FF55',
+  b: '#55FFFF',
+  c: '#FF5555',
+  d: '#FF55FF',
+  e: '#FFFF55',
+  f: '#FFFFFF',
+};
+
+export const MC_COLOR_NAMES: Record<string, string> = {
+  '0': 'Black',
+  '1': 'Dark Blue',
+  '2': 'Dark Green',
+  '3': 'Dark Aqua',
+  '4': 'Dark Red',
+  '5': 'Dark Purple',
+  '6': 'Gold',
+  '7': 'Gray',
+  '8': 'Dark Gray',
+  '9': 'Blue',
+  a: 'Green',
+  b: 'Aqua',
+  c: 'Red',
+  d: 'Light Purple',
+  e: 'Yellow',
+  f: 'White',
+};
+
+export const MC_FORMAT_NAMES: Record<string, string> = {
+  k: 'Obfuscated',
+  l: 'Bold',
+  m: 'Strikethrough',
+  n: 'Underline',
+  o: 'Italic',
+  r: 'Reset',
+};
+
+/** All valid legacy formatting code characters (lowercase) */
+export const MC_CODE_CHARS = '0123456789abcdefklmnor';
+
+/**
+ * Decode a raw .properties value into its actual string:
+ * \uXXXX unicode escapes, \n, \t, \r, \f, and \<char> pass-through.
+ */
+export function decodePropertiesValue(raw: string): string {
+  let out = '';
+  let i = 0;
+  while (i < raw.length) {
+    const ch = raw[i];
+    if (ch === '\\' && i + 1 < raw.length) {
+      const next = raw[i + 1];
+      if (next === 'u' && i + 5 < raw.length) {
+        const hex = raw.substring(i + 2, i + 6);
+        if (/^[0-9a-fA-F]{4}$/.test(hex)) {
+          out += String.fromCharCode(parseInt(hex, 16));
+          i += 6;
+          continue;
+        }
+      }
+      if (next === 'n') out += '\n';
+      else if (next === 't') out += '\t';
+      else if (next === 'r') out += '\r';
+      else if (next === 'f') out += '\f';
+      else out += next;
+      i += 2;
+    } else {
+      out += ch;
+      i += 1;
+    }
+  }
+  return out;
+}
+
+/**
+ * Encode a decoded MOTD string into a .properties-safe raw value:
+ * backslashes, newlines, tabs, and every non-ASCII character (including §)
+ * become escapes, so the file stays plain ASCII and parses identically on
+ * every server version and file encoding.
+ */
+export function encodeMotdForProperties(text: string): string {
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const code = text.charCodeAt(i);
+    if (ch === '\\') out += '\\\\';
+    else if (ch === '\n') out += '\\n';
+    else if (ch === '\t') out += '\\t';
+    else if (ch === '\r') out += '\\r';
+    else if (ch === ' ' && i === 0) out += '\\u0020';
+    else if (code < 0x20 || code > 0x7e) out += `\\u${code.toString(16).padStart(4, '0').toUpperCase()}`;
+    else out += ch;
+  }
+  return out;
+}
+
+/** Convert &-style codes to real section signs (&a → §a) */
+export function ampToSection(text: string): string {
+  return text.replace(/&([0-9a-fk-orA-FK-OR])/g, '§$1');
+}
+
+/** Convert section signs to &-style codes for editing */
+export function sectionToAmp(text: string): string {
+  return text.replace(/§/g, '&');
+}
 
 /** Build a lookup map from property key to metadata */
 export const PROPERTY_MAP: Record<string, PropMeta> = {};

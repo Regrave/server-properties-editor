@@ -23,6 +23,7 @@ import Select from '@/elements/input/Select.tsx';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
+import MotdModal, { MotdPreview } from './MotdModal.tsx';
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
@@ -30,7 +31,9 @@ import {
   type ParsedLine,
   type PropCategory,
   type PropMeta,
+  decodePropertiesValue,
   parseServerProperties,
+  sectionToAmp,
   serializeServerProperties,
 } from './properties.ts';
 
@@ -360,6 +363,34 @@ function PropertyRow({
   );
 }
 
+function MotdField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (key: string, value: string) => void;
+}) {
+  const [editorOpen, setEditorOpen] = useState(false);
+  const ampText = sectionToAmp(decodePropertiesValue(value));
+
+  return (
+    <>
+      <Group gap='sm' wrap='nowrap' w='100%'>
+        <MotdPreview ampText={ampText} className='sp-motd-inline' />
+        <Button variant='light' size='xs' onClick={() => setEditorOpen(true)}>
+          Edit
+        </Button>
+      </Group>
+      <MotdModal
+        opened={editorOpen}
+        onClose={() => setEditorOpen(false)}
+        rawValue={value}
+        onSave={(raw) => onChange('motd', raw)}
+      />
+    </>
+  );
+}
+
 function PropertyInput({
   propKey,
   value,
@@ -371,6 +402,10 @@ function PropertyInput({
   meta: PropMeta | null;
   onChange: (key: string, value: string) => void;
 }) {
+  if (propKey === 'motd') {
+    return <MotdField value={value} onChange={onChange} />;
+  }
+
   if (!meta) {
     return (
       <TextInput

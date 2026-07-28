@@ -14,8 +14,14 @@ Modified values are highlighted and tracked. Save all changes at once with a sin
 
 ![Modified Properties](.github/screenshots/properties-modified.png)
 
+### MOTD Editor
+Write your MOTD with `&` color codes — no section sign needed. Live server-list preview, color palette, and format buttons. Codes are saved as `§` escapes so they work on every server version.
+
+![MOTD Editor](.github/screenshots/motd-editor.png)
+
 ## Features
 
+- **MOTD editor** - Modal editor with `&` color code support, clickable color/format palette, live server-list preview (including obfuscated text animation), and two-line MOTDs. Values are written as properties-safe `§` escapes and decoded back to `&` codes for editing — legacy files with raw `§` or existing escapes both work
 - **Categorized view** - Properties grouped into General, World, Players, Performance, Network, Security, Resource Pack, RCON & Query, and Management Server
 - **Smart input types** - Booleans render as toggles, enums as dropdowns, integers as number inputs, view/simulation distance as sliders
 - **Descriptions for every property** - Clear explanations of what each setting does
